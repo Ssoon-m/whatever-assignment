@@ -37,4 +37,12 @@ describe("cloneDeep", () => {
     expect(obj).not.toEqual(cloneObj);
     expect(obj[3][2][6]).not.toBe(cloneObj[3][2][6]);
   });
+
+  test("4. 기본형 데이터를 넣었을 경우 그 값을 그대로 반환한다.", () => {
+    const value = 1;
+
+    const cloneValue = cloneDeep(value);
+
+    expect(value).toBe(cloneValue);
+  });
 });
