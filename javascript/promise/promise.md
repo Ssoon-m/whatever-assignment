@@ -193,5 +193,8 @@ new myPromise((res, rej) => rej(1))
 ```typescript
 new myPromise((resolve, reject) => {
   setTimeout(() => resolve(1), 1000);
-}).then(console.log); // undefined
+}).then(console.log); // then 핸들러가 불리지 않음
 ```
+
+이유는 status를 바꾸기 이전에 then핸들러가 실행이 되어버리기 때문입니다.
+어떻게 해야 status가 대기(pending)상태일땐 then 핸들러를 실행하지 않고, 이행(fulfilled)상태로 변경이 되었을때 실행을 시킬수가 있을까요?
