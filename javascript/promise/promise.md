@@ -85,7 +85,7 @@ then과 catch 그리고 예시코드에서는 작성하지 않은 finally의 경
 
 > 위에서 설명한 Promise의 메서드들을 전부 구현하고 예시 코드가 모두 정상적으로 동작하게끔 구현을 할 것입니다.
 
-### 뼈대 잡기
+### 기본 구조 잡기
 
 프로미스에는 세가지 상태(대기,이행,거부)가 있다고 했습니다.
 이를 위한 enum을 하나 만들어주도록 하겠습니다.
@@ -142,6 +142,50 @@ new myPromise((resolve, reject) => {
 - 프로미스 이행시 할 일을 then핸들러로 처리를 해줍니다.
 - then핸들러 실행시 콜백 함수를 넘겨줬을 경우 새로운 프로미스를 반환하고 콜 함수를 넘기지 않았을 경우 이전에 처리된 값과 상태 그대로 처리되는 새로운 프로미스를 반환합니다.
 
+### catch 메서드 및 조건 추가
+
+then메서드에 현재 상태를 판단하는 조건문을 추가해줍니다.
+catch 메서드는 try catch를 이용하여 구현을 해줍니다.
+
+```typescript
+ then(onfulfilled?: (value: any) => any) {
+    if (onfulfilled && this.status === STATUS.FULFILLED) {
+      return new myPromise((resolve) => resolve(onfulfilled(this.value)));
+    }
+    return this;
+  }
+  catch(onrejected?: (reason: any) => any) {
+    if (onrejected && this.status === STATUS.REJECTED) {
+      try {
+        const value = onrejected(this.error);
+        return new myPromise((resolve) => resolve(value));
+      } catch (e) {
+        return new myPromise((_, reject) => reject(e));
+      }
+    }
+    return this;
+```
+
+- catch의 경우에도 콜백이 호출될 경우 그 반환값으로 이행하며 호출되지 않을 경우, 즉 이전 프로미스가 이행하는 경우 이행한 값을 그대로 사용해 이행하는 새로운 프로미스를 반환합니다.
+
+Promise와 비슷하게 catch 체이닝도 동작하는걸 확인할 수 있습니다.
+
+```typescript
+new myPromise((res, rej) => rej(1))
+  .then((res) => res + 1)
+  .catch((error) => {
+    console.log("****Error**** :  ", error); // ****Error**** : 1
+    throw new Error("2");
+  })
+  .catch((error) => {
+    console.log("****Error**** : ", error.message); // ****Error**** : 2
+    return "success";
+  })
+  .then((result) => {
+    console.log("after catch:", result); // after catch: success
+  });
+```
+
 얼추 동작 과정은 기존 프로미스와 비슷한 거 같습니다.
 그런데, 문제점이 아직 남아있습니다.
 만약 비동기 코드를 통해 `resolve`를 실행시키면 기대와 다른 동작을 하는걸 확인할 수 있습니다.
@@ -151,4 +195,3 @@ new myPromise((resolve, reject) => {
   setTimeout(() => resolve(1), 1000);
 }).then(console.log); // undefined
 ```
-
