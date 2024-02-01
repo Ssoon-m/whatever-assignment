@@ -86,9 +86,11 @@ export class myPromise {
           (error: any) => {
             try {
               if (this.status !== STATUS.FULFILLED) {
-                onrejected(error);
+                const value = onrejected(error);
+                resolve(value);
+              } else {
+                resolve(this.value);
               }
-              resolve(this.value);
             } catch (e) {
               reject(e);
             }

@@ -108,6 +108,40 @@ describe("myPromise", () => {
           expect(resolveCallbackCount).toBe(0);
         });
     });
+    test("3-3. [비동기] promise가 reject상태일 경우 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
+      let resolveCallbackCount = 0;
+      await new myPromise((resolve, reject) => setTimeout(() => reject(1), 100))
+        .then((value) => {
+          resolveCallbackCount++;
+          return value + 1;
+        })
+        .then((value) => {
+          resolveCallbackCount++;
+          throw value + 1;
+        })
+        .catch((e) => e + 1)
+        .then((value) => {
+          expect(resolveCallbackCount).toBe(0);
+          expect(value).toBe(2);
+        });
+    });
+    test("3-4. [동기] promise가 reject상태일 경우 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
+      let resolveCallbackCount = 0;
+      await new myPromise((resolve, reject) => reject(1))
+        .then((value) => {
+          resolveCallbackCount++;
+          return value + 1;
+        })
+        .then((value) => {
+          resolveCallbackCount++;
+          throw value + 1;
+        })
+        .catch((e) => e + 1)
+        .then((value) => {
+          expect(resolveCallbackCount).toBe(0);
+          expect(value).toBe(2);
+        });
+    });
     test("4-1. [비동기] finally가 정상적으로 세 번 호출이 되고, finally이전 프로미스의 이행,거부에 대한 값이 유지가 된다.", async () => {
       let finallyCallbackCount = 0;
       await new myPromise((resolve, reject) =>
