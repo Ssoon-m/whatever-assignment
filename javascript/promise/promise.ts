@@ -67,7 +67,14 @@ export class myPromise {
       });
     }
     if (this.status === STATUS.FULFILLED) {
-      return new myPromise((resolve) => resolve(onfulfilled(this.value)));
+      return new myPromise((resolve, reject) => {
+        try {
+          const result = onfulfilled(this.value);
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      });
     }
   }
   public catch(onrejected?: (reason: any) => any) {
@@ -92,6 +99,15 @@ export class myPromise {
     if (this.status === STATUS.FULFILLED) {
       return this;
     }
+
+    return new myPromise((resolve, reject) => {
+      try {
+        const value = onrejected(this.error);
+        resolve(value);
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
   finally(onfinally?: () => void) {
     if (!onfinally) return this;
@@ -109,66 +125,15 @@ export class myPromise {
           },
         ]);
       });
+    } else {
+      onfinally();
+      return new myPromise((resolve, reject) => {
+        if (this.status === STATUS.REJECTED) {
+          reject(this.error);
+        } else if (this.status === STATUS.FULFILLED) {
+          resolve(this.value);
+        }
+      });
     }
   }
 }
-
-// new myPromise((res, rej) => setTimeout(() => res(1), 1000))
-//   .then((result) => result + 1)
-//   .then((result) => result + 1)
-//   .catch((error) => console.log(error))
-//   .then(console.log);
-
-// new myPromise((res, rej) => setTimeout(() => res(1), 1000))
-//   .then((result) => result + 1)
-//   .then((result) => {
-//     throw result + 1;
-//   })
-//   .catch((error) => console.error(error + 2))
-//   .then(console.log);
-
-// new myPromise((res, rej) => setTimeout(() => rej(100), 1000))
-//   .then((result) => result + 1)
-//   .then((result) => console.log("sdfds"))
-//   .catch((error) => console.log(error))
-//   .then(console.log);
-
-// new myPromise((res, rej) => setTimeout(() => rej(1), 1000))
-//   .then((result) => result + 1)
-//   .then((result) => console.log("sdf"))
-//   .catch((error) => {
-//     throw new Error("11111");
-//   })
-//   .catch((error) => console.log(error.message))
-//   .catch((error) => {
-//     return new myPromise((res, rej) => setTimeout(() => res(100), 1000));
-//   })
-//   .catch((error) => console.log(error))
-//   .then(console.log);
-
-// new myPromise((res, rej) => setTimeout(() => res(1), 1000))
-//   .then((result) => {
-//     return new myPromise((res) => res(100));
-//   })
-//   .then((res) => res + 10)
-//   .then(
-//     (value) =>
-//       new myPromise((res, rej) => setTimeout(() => res(value + 10), 1000))
-//   )
-//   .then(console.log);
-
-// new myPromise((res, rej) => setTimeout(() => rej("error occurred"), 1000))
-//   .catch((error) => {
-//     throw new Error(error);
-//   })
-//   .catch((e) => console.log(e.message))
-//   .catch((error) => {
-//     return new myPromise((res, rej) => setTimeout(() => rej(100), 1000));
-//   })
-//   .catch(() => console.log("sdf"));
-new myPromise((res, rej) => setTimeout(() => rej(1), 1000))
-  .then((result) => result + 1)
-  .catch((error) => {
-    throw new Error("11111");
-  })
-  .finally(() => console.log("finally"));
