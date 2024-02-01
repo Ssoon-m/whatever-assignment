@@ -78,7 +78,7 @@ describe("myPromise", () => {
           expect(finallyBlockExecuted).toBe(true);
         });
     });
-    test("3-1. [비동기] promise가 reject상태일 경우 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
+    test("3-1. [비동기] promise가 reject상태일 경우 catch 이전 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
       let resolveCallbackCount = 0;
       await new myPromise((resolve, reject) =>
         setTimeout(() => reject(1), 1000)
@@ -94,7 +94,7 @@ describe("myPromise", () => {
           expect(resolveCallbackCount).toBe(0);
         });
     });
-    test("3-2. [동기] promise가 reject상태일 경우 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
+    test("3-2. [동기] promise가 reject상태일 경우 catch 이전 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
       let resolveCallbackCount = 0;
       await new myPromise((resolve, reject) => reject(1))
         .then(() => resolveCallbackCount++)
@@ -108,7 +108,7 @@ describe("myPromise", () => {
           expect(resolveCallbackCount).toBe(0);
         });
     });
-    test("3-3. [비동기] promise가 reject상태일 경우 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
+    test("3-3. [비동기] promise가 reject상태일 경우 catch 이전 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
       let resolveCallbackCount = 0;
       await new myPromise((resolve, reject) => setTimeout(() => reject(1), 100))
         .then((value) => {
@@ -125,7 +125,7 @@ describe("myPromise", () => {
           expect(value).toBe(2);
         });
     });
-    test("3-4. [동기] promise가 reject상태일 경우 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
+    test("3-4. [동기] promise가 reject상태일 경우 catch 이전 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
       let resolveCallbackCount = 0;
       await new myPromise((resolve, reject) => reject(1))
         .then((value) => {
