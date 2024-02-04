@@ -56,7 +56,7 @@ export class myPromise<T> {
       return new myPromise((resolve, reject) => {
         this.callbacks.push([
           STATUS.FULFILLED,
-          (value: any) => {
+          (value: T) => {
             if (this.status === STATUS.FULFILLED) {
               try {
                 const result = onfulfilled(value);
