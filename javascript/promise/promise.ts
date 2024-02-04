@@ -148,11 +148,3 @@ export class myPromise<T> {
     }
   }
 }
-
-new Promise<number>((res, rej) => {
-  res(1);
-})
-  .then((value) => value + 2)
-  .catch((e) => "2")
-  .then((value) => console.log(value))
-  .finally(() => console.log(""));
