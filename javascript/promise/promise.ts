@@ -4,15 +4,15 @@ enum STATUS {
   REJECTED,
 }
 
-export class myPromise {
+export class myPromise<T> {
   private status: STATUS;
-  private value: any;
+  private value: T;
   private error: any;
-  private callbacks: any[];
+  private callbacks: [STATUS, (v?: any) => void][];
 
   constructor(
     executor: (
-      resolve: (value: any) => void,
+      resolve: (value: T | myPromise<T>) => void,
       reject: (reason?: any) => void
     ) => void
   ) {
@@ -26,10 +26,10 @@ export class myPromise {
     this.excuteCallback();
   }
   private resolve(value?: any) {
-    this.status = STATUS.FULFILLED;
     if (value instanceof myPromise) {
       return value.then(this.resolve.bind(this));
     }
+    this.status = STATUS.FULFILLED;
     this.value = value;
     this.excuteCallback();
   }
@@ -44,8 +44,13 @@ export class myPromise {
       }
     }
   }
-  public then(onfulfilled?: (value: any) => any) {
-    if (!onfulfilled || this.status === STATUS.REJECTED) return this;
+  public then<TResult1 = T, TResult2 = never>(
+    onfulfilled?: (
+      value: T
+    ) => TResult1 | myPromise<TResult1> | undefined | null
+  ): myPromise<TResult1 | TResult2> {
+    if (!onfulfilled || this.status === STATUS.REJECTED)
+      return this as myPromise<TResult1 | TResult2>;
 
     if (this.status === STATUS.PENDING) {
       return new myPromise((resolve, reject) => {
@@ -77,7 +82,11 @@ export class myPromise {
       });
     }
   }
-  public catch(onrejected?: (reason: any) => any) {
+  public catch<TResult = never>(
+    onrejected?: (
+      reason: any
+    ) => TResult | myPromise<TResult> | undefined | null
+  ): myPromise<T | TResult> {
     if (!onrejected) return this;
     if (this.status === STATUS.PENDING) {
       return new myPromise((resolve, reject) => {
@@ -111,7 +120,7 @@ export class myPromise {
       }
     });
   }
-  finally(onfinally?: () => void) {
+  finally(onfinally?: () => void): myPromise<T> {
     if (!onfinally) return this;
     if (this.status === STATUS.PENDING) {
       return new myPromise((resolve, reject) => {

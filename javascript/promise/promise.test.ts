@@ -4,7 +4,7 @@ import { myPromise } from "./promise";
 describe("myPromise", () => {
   describe("promise 기본 동작 테스트", () => {
     test("1. then 체이닝이 정상적으로 동작한다.", async () => {
-      await new myPromise((resolve) => resolve(1))
+      await new myPromise<number>((resolve) => resolve(1))
         .then((value) => value + 1)
         .then((value) => expect(value).toBe(2));
     });
@@ -16,12 +16,14 @@ describe("myPromise", () => {
         .catch((error) => expect(error).toBe("error occurred"));
     });
     test("3. 비동기로 resolve 콜백을 실행시켜도 정상 동작을 한다.", async () => {
-      await new myPromise((resolve) => setTimeout(() => resolve(1), 100))
+      await new myPromise<number>((resolve) =>
+        setTimeout(() => resolve(1), 100)
+      )
         .then((value) => {
-          return new myPromise((resolve) => resolve(value + 1));
+          return new myPromise<number>((resolve) => resolve(value + 1));
         })
         .then((value) => {
-          return new myPromise((resolve) =>
+          return new myPromise<number>((resolve) =>
             setTimeout(() => resolve(value + 1), 100)
           );
         })
@@ -39,7 +41,7 @@ describe("myPromise", () => {
   });
   describe("체이닝 형태로 then,catch,finally를 연속적으로 실행", () => {
     test("1-1. [비동기] then 핸들러에서 에러가 발생한 경우 catch가 정상적으로 동작한다.", async () => {
-      await new myPromise((resolve, reject) =>
+      await new myPromise<number>((resolve, reject) =>
         setTimeout(() => resolve(1), 100)
       )
         .then((value) => value + 1)
@@ -49,7 +51,7 @@ describe("myPromise", () => {
         .catch((error) => expect(error).toBe(3));
     });
     test("1-2. [동기] then 핸들러에서 에러가 발생한 경우 catch가 정상적으로 동작한다.", async () => {
-      await new myPromise((resolve, reject) => resolve(1))
+      await new myPromise<number>((resolve, reject) => resolve(1))
         .then((value) => value + 1)
         .then((value) => {
           throw value + 1;
@@ -58,7 +60,7 @@ describe("myPromise", () => {
     });
     test("2-1. [비동기] finally가 정상적으로 동작한다.", async () => {
       let finallyBlockExecuted = false;
-      await new myPromise((resolve, reject) =>
+      await new myPromise<number>((resolve, reject) =>
         setTimeout(() => reject(1), 1000)
       )
         .then((value) => value + 1)
@@ -70,7 +72,7 @@ describe("myPromise", () => {
     });
     test("2-2. [동기] finally가 정상적으로 동작한다.", async () => {
       let finallyBlockExecuted = false;
-      await new myPromise((resolve, reject) => reject(1))
+      await new myPromise<number>((resolve, reject) => reject(1))
         .then((value) => value + 1)
         .catch((error) => {})
         .finally(() => {
@@ -110,7 +112,9 @@ describe("myPromise", () => {
     });
     test("3-3. [비동기] promise가 reject상태일 경우 catch 이전 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
       let resolveCallbackCount = 0;
-      await new myPromise((resolve, reject) => setTimeout(() => reject(1), 100))
+      await new myPromise<number>((resolve, reject) =>
+        setTimeout(() => reject(1), 100)
+      )
         .then((value) => {
           resolveCallbackCount++;
           return value + 1;
@@ -127,7 +131,7 @@ describe("myPromise", () => {
     });
     test("3-4. [동기] promise가 reject상태일 경우 catch 이전 then핸들러의 콜백 함수를 실행시키지 않는다.", async () => {
       let resolveCallbackCount = 0;
-      await new myPromise((resolve, reject) => reject(1))
+      await new myPromise<number>((resolve, reject) => reject(1))
         .then((value) => {
           resolveCallbackCount++;
           return value + 1;
@@ -144,7 +148,7 @@ describe("myPromise", () => {
     });
     test("4-1. [비동기] finally가 정상적으로 세 번 호출이 되고, finally이전 프로미스의 이행,거부에 대한 값이 유지가 된다.", async () => {
       let finallyCallbackCount = 0;
-      await new myPromise((resolve, reject) =>
+      await new myPromise<number>((resolve, reject) =>
         setTimeout(() => resolve(1), 1000)
       )
         .then((value) => value + 1)
@@ -164,7 +168,7 @@ describe("myPromise", () => {
     });
     test("4-2. [동기] finally가 정상적으로 세 번 호출이 되고, finally이전 프로미스의 이행,거부에 대한 값이 유지가 된다.", async () => {
       let finallyCallbackCount = 0;
-      await new myPromise((resolve, reject) => resolve(1))
+      await new myPromise<number>((resolve, reject) => resolve(1))
         .then((value) => value + 1)
         .then((value) => value + 2)
         .finally(() => finallyCallbackCount++)
