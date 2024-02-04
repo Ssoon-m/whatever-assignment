@@ -1,9 +1,10 @@
-type MemoizeFn<T> = (...args: any[]) => T;
+type MemoizeFn<T, U = never> = (...args: U[]) => T;
 
-const memoize = <T>(fn: MemoizeFn<T>): MemoizeFn<T> => {
+const memoize = <T, U>(fn: MemoizeFn<T, U>): MemoizeFn<T, U> => {
   const memo = new Map();
-  return (...args: any[]) => {
+  return (...args: Parameters<MemoizeFn<T, U>>) => {
     const key = JSON.stringify(args);
+    console.log("key", key);
 
     if (memo.has(key)) {
       console.log("Cache hit!");
