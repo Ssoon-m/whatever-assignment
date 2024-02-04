@@ -1,4 +1,4 @@
-const arrayClone = <T extends any[]>(arr: T): T[] => {
+const arrayClone = <T>(arr: T[]): T[] => {
   let result: T[] = [];
   for (const el of arr) {
     if (typeof el === "object") {
