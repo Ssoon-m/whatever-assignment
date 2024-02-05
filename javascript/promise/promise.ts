@@ -23,7 +23,9 @@ export class myPromise<T> {
   private reject(reason?: any) {
     this.status = STATUS.REJECTED;
     this.error = reason;
-    this.excuteCallback();
+    queueMicrotask(() => {
+      this.excuteCallback();
+    });
   }
   private resolve(value?: any) {
     if (value instanceof myPromise) {
@@ -31,7 +33,10 @@ export class myPromise<T> {
     }
     this.status = STATUS.FULFILLED;
     this.value = value;
-    this.excuteCallback();
+
+    queueMicrotask(() => {
+      this.excuteCallback();
+    });
   }
   private excuteCallback() {
     for (const [_status, callback] of this.callbacks) {
@@ -73,12 +78,14 @@ export class myPromise<T> {
     }
     if (this.status === STATUS.FULFILLED) {
       return new myPromise((resolve, reject) => {
-        try {
-          const result = onfulfilled(this.value);
-          resolve(result);
-        } catch (error) {
-          reject(error);
-        }
+        queueMicrotask(() => {
+          try {
+            const result = onfulfilled(this.value);
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        });
       });
     }
   }
@@ -95,8 +102,8 @@ export class myPromise<T> {
           (error: any) => {
             try {
               if (this.status !== STATUS.FULFILLED) {
-                const value = onrejected(error);
-                resolve(value);
+                const result = onrejected(error);
+                resolve(result);
               } else {
                 resolve(this.value);
               }
@@ -112,12 +119,14 @@ export class myPromise<T> {
     }
 
     return new myPromise((resolve, reject) => {
-      try {
-        const value = onrejected(this.error);
-        resolve(value);
-      } catch (e) {
-        reject(e);
-      }
+      queueMicrotask(() => {
+        try {
+          const result = onrejected(this.error);
+          resolve(result);
+        } catch (e) {
+          reject(e);
+        }
+      });
     });
   }
   finally(onfinally?: () => void): myPromise<T> {
@@ -137,7 +146,9 @@ export class myPromise<T> {
         ]);
       });
     } else {
-      onfinally();
+      queueMicrotask(() => {
+        onfinally();
+      });
       return new myPromise((resolve, reject) => {
         if (this.status === STATUS.REJECTED) {
           reject(this.error);

@@ -1,6 +1,9 @@
 // import { cloneDeep } from "./objectcopy";
 import { myPromise } from "./promise";
 
+const delay = (ms: number) =>
+  new myPromise((res) => setTimeout(() => res(true), ms));
+
 describe("myPromise", () => {
   describe("promise 기본 동작 테스트", () => {
     test("1. then 체이닝이 정상적으로 동작한다.", async () => {
@@ -39,6 +42,7 @@ describe("myPromise", () => {
         .catch((error) => expect(error.message).toBe("error occurred"));
     });
   });
+
   describe("체이닝 형태로 then,catch,finally를 연속적으로 실행", () => {
     test("1-1. [비동기] then 핸들러에서 에러가 발생한 경우 catch가 정상적으로 동작한다.", async () => {
       await new myPromise<number>((resolve, reject) =>
@@ -106,6 +110,8 @@ describe("myPromise", () => {
         })
         .catch((error) => expect(error.message).toBe("error occurred"))
         .then((value) => {
+          console.log("value", value);
+          console.log("resolveCallbackCount", resolveCallbackCount);
           expect(value).toBe(undefined);
           expect(resolveCallbackCount).toBe(0);
         });
@@ -183,6 +189,23 @@ describe("myPromise", () => {
           expect(value).toBe(undefined);
           expect(finallyCallbackCount).toBe(3);
         });
+    });
+  });
+
+  describe("마이크로테스크큐 테스트", () => {
+    test("이벤트 루프가 정상적인 순서로 동작합니다.", async () => {
+      const arr = [];
+      arr.push(1);
+      setTimeout(() => arr.push(2));
+      new myPromise((res) => res(3)).then((v) => arr.push(v));
+      new myPromise((res) => res(null)).then(() =>
+        setTimeout(() => arr.push(4))
+      );
+      new myPromise((res) => res(5)).then((v) => arr.push(v));
+      setTimeout(() => arr.push(6));
+      arr.push(7);
+      await delay(1000);
+      expect(arr).toEqual([1, 7, 3, 5, 2, 6, 4]);
     });
   });
 });
