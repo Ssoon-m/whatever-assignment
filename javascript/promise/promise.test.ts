@@ -1,4 +1,3 @@
-// import { cloneDeep } from "./objectcopy";
 import { myPromise } from "./promise";
 
 const delay = (ms: number) =>
