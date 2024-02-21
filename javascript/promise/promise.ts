@@ -6,10 +6,8 @@ enum STATUS {
 
 class myPromise<T> {
   state: STATUS;
-  value: T;
-  error: any;
-  fulfilledCallback?: () => void;
-  rejectedCallback?: () => void;
+  fulfilledCallback?: (value: T) => void;
+  rejectedCallback?: (error: any) => void;
   constructor(
     excute: (
       resolve: (value: T | myPromise<T>) => void,
@@ -26,15 +24,13 @@ class myPromise<T> {
     }
     queueMicrotask(() => {
       this.state = STATUS.FULFILLED;
-      this.value = value;
-      this.fulfilledCallback?.();
+      this.fulfilledCallback?.(value);
     });
   }
   reject(error: any) {
     queueMicrotask(() => {
       this.state = STATUS.REJECTED;
-      this.error = error;
-      this.rejectedCallback?.();
+      this.rejectedCallback?.(error);
     });
   }
 
@@ -43,10 +39,10 @@ class myPromise<T> {
     onrejected?: (error: any) => TResult2 | myPromise<TResult2>
   ): myPromise<TResult1 | TResult2> {
     return new myPromise((resolve, reject) => {
-      this.fulfilledCallback = () => {
+      this.fulfilledCallback = (value) => {
         if (onfulfilled) {
           try {
-            resolve(onfulfilled(this.value));
+            resolve(onfulfilled(value));
           } catch (e) {
             reject(e);
           }
@@ -54,12 +50,12 @@ class myPromise<T> {
         }
       };
 
-      this.rejectedCallback = () => {
+      this.rejectedCallback = (error) => {
         if (onrejected) {
-          reject(onrejected(this.error));
+          reject(onrejected(error));
           return;
         }
-        reject(this.error);
+        reject(error);
       };
     });
   }
@@ -67,16 +63,16 @@ class myPromise<T> {
     onrejected?: (reason: any) => TResult | myPromise<TResult>
   ): myPromise<T | TResult> {
     return new myPromise((resolve, reject) => {
-      this.fulfilledCallback = () => {
+      this.fulfilledCallback = (value) => {
         try {
-          resolve(onrejected(this.value));
+          resolve(onrejected(value));
         } catch (e) {
           reject(e);
         }
       };
-      this.rejectedCallback = () => {
+      this.rejectedCallback = (error) => {
         try {
-          resolve(onrejected(this.error));
+          resolve(onrejected(error));
         } catch (e) {
           reject(e);
         }
@@ -85,18 +81,18 @@ class myPromise<T> {
   }
   finally(onfinally?: () => void): myPromise<T> {
     return new myPromise((resolve, reject) => {
-      this.fulfilledCallback = () => {
+      this.fulfilledCallback = (value) => {
         try {
           onfinally();
-          resolve(this.value);
+          resolve(value);
         } catch (e) {
           reject(e);
         }
       };
-      this.rejectedCallback = () => {
+      this.rejectedCallback = (error) => {
         try {
           onfinally();
-          resolve(this.error);
+          resolve(error);
         } catch (e) {
           reject(e);
         }
