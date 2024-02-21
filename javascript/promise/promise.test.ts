@@ -7,11 +7,11 @@ describe("myPromise", () => {
   describe("promise 기본 동작 테스트", () => {
     test("1. then 체이닝이 정상적으로 동작한다.", async () => {
       await new myPromise<number>((resolve) => resolve(1))
-        .then((value) => value + 1)
-        .then((value) => expect(value).toBe(2));
+        .then((value) => value + 1) // onfulfilled
+        .then((value) => expect(value).toBe(2)); //
     });
     test("2. catch 체이닝이 정상적으로 동작한다.", async () => {
-      await new myPromise((reject) => reject("error occurred"))
+      await new myPromise((reslove, reject) => reject("error occurred"))
         .catch((error) => {
           throw error;
         })
@@ -67,9 +67,10 @@ describe("myPromise", () => {
         setTimeout(() => reject(1), 1000)
       )
         .then((value) => value + 1)
-        .catch((error) => {})
-        .finally(() => {
+        .catch((error) => {
           finallyBlockExecuted = true;
+        })
+        .finally(() => {
           expect(finallyBlockExecuted).toBe(true);
         });
     });
@@ -77,9 +78,10 @@ describe("myPromise", () => {
       let finallyBlockExecuted = false;
       await new myPromise<number>((resolve, reject) => reject(1))
         .then((value) => value + 1)
-        .catch((error) => {})
-        .finally(() => {
+        .catch((error) => {
           finallyBlockExecuted = true;
+        })
+        .finally(() => {
           expect(finallyBlockExecuted).toBe(true);
         });
     });
